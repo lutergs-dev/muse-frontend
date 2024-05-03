@@ -9,31 +9,32 @@ import Foundation
 import MediaPlayer
 import UIKit
 
+
 class MusicInfoViewModel: ObservableObject {
-    @Published var currentMusic = MusicInfo()
-    @Published var playStatus = "음악을 재생 중이 아닙니다!"
-    @Published var isPlaying: Bool = false
+    @Published var user: UserSession = UserSession.shared
+    @Published var playStatus: String = "음악을 재생 중이 아닙니다!"
     private let musicFinder = AppleMusicArtworkFinder()
     private let musicPlayer = MusicController()
     
     init() {
+        // 앱의 백그라운드 / 포그라운드 상태와 상관없이, 무조건 음악 재생이 변경되면 POST 요청을 날려야 함.
         subscribeToChange()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(subscribeToChange),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(unsubscribeFromChange),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(subscribeToChange),
+//            name: UIApplication.willEnterForegroundNotification,
+//            object: nil
+//        )
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(unsubscribeFromChange),
+//            name: UIApplication.didEnterBackgroundNotification,
+//            object: nil
+//        )
     }
     
     public func playMusic() {
-        if (self.isPlaying == true) {
+        if (self.user.playStatus == MusicPlayStatus.Playing) {
             self.musicPlayer.stopMusic()
         } else {
             self.musicPlayer.playMusic()
@@ -76,16 +77,21 @@ class MusicInfoViewModel: ObservableObject {
         DispatchQueue.main.async {
             let musicPlayer = MPMusicPlayerController.systemMusicPlayer
             if let nowPlayingItem = musicPlayer.nowPlayingItem {
-                self.currentMusic = MusicInfo.fromMPMediaItem(item: nowPlayingItem)
-                if (self.currentMusic.artwork == nil) {
+                self.user.music = AppleMusicInfo.fromMPMediaItem(item: nowPlayingItem)
+                
+                // send current music playing
+                
+                
+                
+                if (self.user.music.artwork == nil) {
                     Task {
                         if let artworkImage = await self.musicFinder.getMusicArtwork(item: nowPlayingItem) {
-                            self.currentMusic.setArtwork(image: artworkImage)
+                            self.user.music.artwork = artworkImage
                         }
                     }
                 }
             } else {
-                self.currentMusic = MusicInfo()
+                self.user.music = AppleMusicInfo()
             }
         }
         
@@ -100,16 +106,16 @@ class MusicInfoViewModel: ObservableObject {
     private func setPlaybackStatus(state: MPMusicPlaybackState?) {
         switch state {
         case .stopped:
-            self.isPlaying = false
+            self.user.playStatus = MusicPlayStatus.Stopped
             self.playStatus = "음악을 재생 중이 아닙니다!"
         case .playing:
-            self.isPlaying = true
+            self.user.playStatus = MusicPlayStatus.Playing
             self.playStatus = "재생 중"
         case .paused:
-            self.isPlaying = false
+            self.user.playStatus = MusicPlayStatus.Paused
             self.playStatus = "일시정지"
         default:
-            self.isPlaying = false
+            self.user.playStatus = MusicPlayStatus.Stopped
             self.playStatus = self.playStatus
         }
     }
