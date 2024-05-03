@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+class Variables {
+    
+    public static let backendServer: String = "http://192.168.9.8:8081"
+}

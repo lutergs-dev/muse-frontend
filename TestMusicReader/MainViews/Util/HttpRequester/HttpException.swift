@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+enum HttpException: Error {
+    case InvalidUrlException(String)
+    case JsonParseException(String)
+    case InvalidResponse(String)
+}

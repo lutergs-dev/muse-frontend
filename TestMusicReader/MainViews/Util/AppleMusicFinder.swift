@@ -24,7 +24,7 @@ class AppleMusicArtworkFinder {
     func getMusicInfoBySongID(songID: MusicItemID) async -> MusicInfo? {
         if let song = await self.findFirstMusicBySongID(songID: songID) {
             if let image = await self.getArtworkImage(song: song) {
-                return MusicInfo.fromSong(song: song, image: image)
+                return AppleMusicInfo.fromSong(song: song, image: image)
             }
         }
         return nil

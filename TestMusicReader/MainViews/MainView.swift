@@ -13,6 +13,8 @@ struct MainView: View {
     private let currentUserMusicView = CurrentUserMusicView()
     private let otherUserMusicView = OtherUserMusicView()
     
+    private let userView = UserView()
+    
     
     // data for Button
     @State private var showMenu = false
@@ -32,27 +34,22 @@ struct MainView: View {
     
     var body: some View {
         ZStack {
-            
-            switch (self.selectedMenu) {
-                case .MusicMenu:
-                    VStack {
+            VStack {
+                switch (self.selectedMenu) {
+                    case .MusicMenu:
                         self.currentUserMusicView
                             .padding(.bottom, 15)
                         self.otherUserMusicView
-                    }
-                case .UserMenu:
-                    VStack {
-                        Text("UserMenu")
-                            .font(.title2)
-                            .bold()
-                    }
-                case .SettingMenu:
-                    VStack {
+                    case .UserMenu:
+                        self.userView
+                    case .SettingMenu:
                         Text("SettingMenu")
                             .font(.title2)
                             .bold()
-                    }
+                }
             }
+            
+
             
             ZStack {
                 // 배경 흐림 효과
@@ -105,7 +102,7 @@ struct MainView: View {
         let initialOpacity: Double = showMenu ? 1 : 0
 
         return Circle()
-            .fill(Color.purple)
+            .fill(coordinateKey != self.selectedMenu ? Color.purple : Color.gray)
             .frame(width: MainView.iconSize, height: MainView.iconSize)
             .overlay(
                 Image(systemName: iconName)
@@ -134,20 +131,16 @@ struct MainView: View {
     }
 
     func executeMenuAction(at location: CGPoint) {
-        print("exeucte Action!")
         // 여기서 location을 기반으로 어떤 메뉴 항목이 선택되었는지 판단하고 해당 기능을 실행
         if location.x <= self.coordinates[Menus.MusicMenu]!.x + MainView.iconSize &&
             location.y > self.coordinates[Menus.UserMenu]!.y + MainView.iconSize {
             self.selectedMenu = Menus.MusicMenu
-            print("기능 1")
         } else if location.x < self.coordinates[Menus.UserMenu]!.x + MainView.iconSize &&
                     location.y < self.coordinates[Menus.UserMenu]!.y + MainView.iconSize {
             self.selectedMenu = Menus.UserMenu
-            print("기능 2")
         } else if location.x >= self.coordinates[Menus.UserMenu]!.x + MainView.iconSize &&
                     location.y < self.coordinates[Menus.SettingMenu]!.y + MainView.iconSize {
             self.selectedMenu = Menus.SettingMenu
-            print("기능 3")
         } else {
             print("기능 선택 안함")
         }

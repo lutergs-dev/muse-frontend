@@ -9,4 +9,5 @@ import Foundation
 
 struct ResponseUser: Codable {
     var id: Int?
+    var info: ResponseUserInfo
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MusicProviderType {
-    case AppleMusic
-    case Else
+enum MusicProvider: String, CaseIterable {
+    case AppleMusic = "Apple"
+    case Else = "Else"
 }

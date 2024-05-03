@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+
+// 유저 검색 및 보여주기
+class UserViewModel: ObservableObject {
+}

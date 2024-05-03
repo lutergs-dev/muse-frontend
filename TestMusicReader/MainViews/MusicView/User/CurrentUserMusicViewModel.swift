@@ -8,10 +8,12 @@
 import Foundation
 import MediaPlayer
 import UIKit
+import Combine
+import SwiftUI
 
 
 class MusicInfoViewModel: ObservableObject {
-    @Published var user: UserSession = UserSession.shared
+    @ObservedObject var user: CurrentUser = CurrentUser.shared
     @Published var playStatus: String = "음악을 재생 중이 아닙니다!"
     private let musicFinder = AppleMusicArtworkFinder()
     private let musicPlayer = MusicController()
@@ -33,7 +35,7 @@ class MusicInfoViewModel: ObservableObject {
 //        )
     }
     
-    public func playMusic() {
+    @MainActor public func playMusic() {
         if (self.user.playStatus == MusicPlayStatus.Playing) {
             self.musicPlayer.stopMusic()
         } else {
@@ -74,48 +76,47 @@ class MusicInfoViewModel: ObservableObject {
     }
     
     @objc private func nowPlayingItemChanged() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [self] in
             let musicPlayer = MPMusicPlayerController.systemMusicPlayer
             if let nowPlayingItem = musicPlayer.nowPlayingItem {
-                self.user.music = AppleMusicInfo.fromMPMediaItem(item: nowPlayingItem)
-                
-                // send current music playing
-                
-                
-                
-                if (self.user.music.artwork == nil) {
+                var currentMusic = AppleMusicInfo.fromMPMediaItem(item: nowPlayingItem)
+                if (currentMusic.artwork == nil) {
                     Task {
                         if let artworkImage = await self.musicFinder.getMusicArtwork(item: nowPlayingItem) {
-                            self.user.music.artwork = artworkImage
+                            currentMusic.setArtwork(image: artworkImage)
+                            self.user.changeMusic(music: currentMusic)
                         }
                     }
                 }
             } else {
-                self.user.music = AppleMusicInfo()
+                self.user.changeMusic(music: AppleMusicInfo())
             }
         }
         
     }
     
     @objc private func playbackStateChanged() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [self] in
+            if (self.user.music is NilMusicInfo) {
+                self.nowPlayingItemChanged()
+            }
             self.setPlaybackStatus(state: MPMusicPlayerController.systemMusicPlayer.playbackState)
         }
     }
     
-    private func setPlaybackStatus(state: MPMusicPlaybackState?) {
+    @MainActor private func setPlaybackStatus(state: MPMusicPlaybackState?) {
         switch state {
         case .stopped:
-            self.user.playStatus = MusicPlayStatus.Stopped
+            self.user.changePlayStatus(playStatus: MusicPlayStatus.Stopped)
             self.playStatus = "음악을 재생 중이 아닙니다!"
         case .playing:
-            self.user.playStatus = MusicPlayStatus.Playing
+            self.user.changePlayStatus(playStatus: MusicPlayStatus.Playing)
             self.playStatus = "재생 중"
         case .paused:
-            self.user.playStatus = MusicPlayStatus.Paused
+            self.user.changePlayStatus(playStatus: MusicPlayStatus.Paused)
             self.playStatus = "일시정지"
         default:
-            self.user.playStatus = MusicPlayStatus.Stopped
+            self.user.changePlayStatus(playStatus: MusicPlayStatus.Stopped)
             self.playStatus = self.playStatus
         }
     }

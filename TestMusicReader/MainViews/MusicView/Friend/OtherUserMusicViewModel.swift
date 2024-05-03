@@ -10,14 +10,10 @@ import SwiftUI
 
 @MainActor
 class OtherUserMusicViewModel: ObservableObject {
-    @Published var userViews: [(UserInfo, MusicInfo)] = []
-    var userList = dummyUserMusicData
+    @ObservedObject var users: DummyUserMusicData = DummyUserMusicData()
     var timer: Timer?
     
     init() {
-        self.userViews = userList.compactMap { user in
-            return (user, MusicInfo())
-        }
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(startTimer),
@@ -68,20 +64,20 @@ class OtherUserMusicViewModel: ObservableObject {
     }
     
     func updateUserView() async {
-        await withTaskGroup(of: (Int, MusicInfo).self) { group in
-            for (index, userView) in self.userViews.enumerated() {
-                group.addTask {
-                    if let musicInfo = await userView.0.music?.getMusicInfo() {
-                        return (index, musicInfo)
-                    }
-                    return (index, MusicInfo())
-                }
-            }
-
-            // 각 작업의 결과를 수집하고 상태를 업데이트합니다.
-            for await (index, musicInfo) in group {
-                self.userViews[index] = (self.userViews[index].0, musicInfo)
-            }
-        }
+//        await withTaskGroup(of: (Int, MusicInfo).self) { group in
+//            for user in self.users {
+//                group.addTask {
+//                    if let musicInfo = await userView.0.music?.getMusicInfo() {
+//                        return (index, musicInfo)
+//                    }
+//                    return (index, MusicInfo())
+//                }
+//            }
+//
+//            // 각 작업의 결과를 수집하고 상태를 업데이트합니다.
+//            for await (index, musicInfo) in group {
+//                self.userViews[index] = (self.userViews[index].0, musicInfo)
+//            }
+//        }
     }
 }

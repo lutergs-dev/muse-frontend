@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserIn2fo: Codable {
+struct ResponseUserInfo: Codable {
     var name: String
     var friends: [Int]
 }

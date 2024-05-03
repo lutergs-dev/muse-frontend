@@ -10,6 +10,7 @@ import UIKit
 
 struct CurrentUserMusicView: View {
     @ObservedObject var viewModel = MusicInfoViewModel()
+    @ObservedObject var currentUser = CurrentUser.shared
 
     var body: some View {
         VStack {
@@ -18,8 +19,10 @@ struct CurrentUserMusicView: View {
                 .font(.headline)
                 .padding(.vertical, 5)
                 .frame(maxWidth: .infinity)
-                .background(viewModel.isPlaying ? Color.green.opacity(0.7) : Color.gray.opacity(0.7))
-                .foregroundColor(.white)
+                .background(currentUser.playStatus == MusicPlayStatus.Playing ?
+                            Color.green.opacity(0.7) :
+                            Color.gray.opacity(0.7)
+                ).foregroundColor(.white)
                 .cornerRadius(10)
                 .padding(.horizontal)
                 .padding(.top, 10)
@@ -28,36 +31,40 @@ struct CurrentUserMusicView: View {
                 // 앨범 커버와 음악 정보를 담은 박스
                 HStack(alignment: .top) {
                     // 앨범 커버 이미지
-                    if let albumCover = viewModel.currentMusic.artwork {
+                    if let albumCover = currentUser.music.artwork {
                         Image(uiImage: albumCover)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 80, height: 80)
     //                        .clipped()
                             .cornerRadius(8)
-                            .opacity(viewModel.isPlaying ? 1.0 : 0.5)  // 재생 중이 아닐 때 이미지를 어둡게 처리
+                            .opacity(currentUser.playStatus == MusicPlayStatus.Playing
+                                     ? 1.0
+                                     : 0.5)  // 재생 중이 아닐 때 이미지를 어둡게 처리
                     } else {
                         // 이미지 로드 실패시 대체 이미지 또는 색상 표시
                         Rectangle()
-                            .fill(Color.secondary.opacity(viewModel.isPlaying ? 0.3 : 0.5))
+                            .fill(Color.secondary.opacity(currentUser.playStatus == MusicPlayStatus.Playing
+                                                          ? 0.3
+                                                          : 0.5))
                             .frame(width: 80, height: 80)
                             .cornerRadius(8)
                     }
 
                     // 음악 정보 텍스트
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(viewModel.currentMusic.title)  // 곡 제목
+                        Text(currentUser.music.title)  // 곡 제목
                             .font(.title2)
                             .fontWeight(.bold)
                             .lineLimit(1)
                     
 //                        Spacer()  // 곡 제목을 위로, 앨범명을 아래로 밀어붙이기
                         
-                        Text(viewModel.currentMusic.artist)  // 아티스트명
+                        Text(currentUser.music.artist)  // 아티스트명
                             .font(.title3)  // 폰트 크기 증가
                             .lineLimit(1)
                         
-                        Text(viewModel.currentMusic.album)  // 앨범명
+                        Text(currentUser.music.album)  // 앨범명
                             .font(.body)  // 폰트 크기 증가
                             .lineLimit(1)
                     }
@@ -85,7 +92,10 @@ struct CurrentUserMusicView: View {
 
                     // 재생 및 일시정지 버튼
                     Button(action: viewModel.playMusic) {
-                        Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill")
+                        Image(systemName: 
+                                currentUser.playStatus == MusicPlayStatus.Playing
+                                ? "pause.fill"
+                                : "play.fill")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 35, height: 35)

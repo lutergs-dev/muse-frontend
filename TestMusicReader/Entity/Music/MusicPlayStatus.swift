@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+enum MusicPlayStatus: String, CaseIterable {
+    case Playing = "PLAYING"
+    case Paused = "PAUSED"
+    case Stopped = "STOPPED"
+}

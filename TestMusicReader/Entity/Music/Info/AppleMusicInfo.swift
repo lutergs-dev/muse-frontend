@@ -16,6 +16,7 @@ struct AppleMusicInfo: MusicInfo {
     var title: String = "재생 중이 아님"
     var artist: String = ""
     var album: String = ""
+    var uid: String = ""
 
     static func fromMPMediaItem(item: MPMediaItem) -> AppleMusicInfo {
         let artworkImage = item.artwork.map { artwork in
@@ -25,7 +26,8 @@ struct AppleMusicInfo: MusicInfo {
             artwork: artworkImage ?? nil,
             title: item.title ?? "재생 중이 아님",
             artist: item.artist ?? "",
-            album: item.albumTitle ?? ""
+            album: item.albumTitle ?? "",
+            uid: item.persistentID.description
         )
     }
 
@@ -34,14 +36,11 @@ struct AppleMusicInfo: MusicInfo {
             artwork: image,
             title: song.title,
             artist: song.artistName,
-            album: song.albumTitle ?? ""
+            album: song.albumTitle ?? "",
+            uid: song.id.rawValue
         )
     }
     
-    static func fromSongID(id: String) -> AppleMusicInfo {
-        if let result = 
-    }
-
     mutating func setArtwork(image: UIImage) {
         self.artwork = image
     }

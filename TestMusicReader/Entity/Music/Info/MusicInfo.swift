@@ -15,13 +15,6 @@ protocol MusicInfo {
     var title: String { get set }
     var artist: String { get set }
     var album: String { get set }
-}
-
-class NilMusicInfo: MusicInfo {
-    var provider = MusicProvider.Else
-    var artwork: UIImage? = nil
-    var title = "재생 중이 아님"
-    var artist: String = ""
-    var album: String = ""
+    var uid: String { get set }
 }
 

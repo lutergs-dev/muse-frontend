@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct HTTPResponse {
+    var response: HTTPURLResponse
+    var body: Data
+}
